@@ -1,0 +1,76 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Sun, 13 Dec 2020 12:56:02 +0100
+Subject: [PATCH] added option to hide player ips in log files
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperConfig.java b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+index 6ab0a51b421dc696aec292f2db955311c9cc31e3..d08c71a1d6ac180408b5f524643a69002d8c3cc2 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperConfig.java
+@@ -462,4 +462,9 @@ public class PaperConfig {
+     private static void trackPluginScoreboards() {
+         trackPluginScoreboards = getBoolean("settings.track-plugin-scoreboards", false);
+     }
++
++    public static boolean hidePlayersIpsInLogs = false;
++    private static void playerIpsInLog() {
++        hidePlayersIpsInLogs = getBoolean("settings.hide-player-ips-in-logs", false);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
+index c61cd50df0c81f7ab12bd0c955fd6f07f2b02e64..81ae40a7ffecf7b66fb1c33c5947b5aca1ac24e7 100644
+--- a/src/main/java/net/minecraft/server/LoginListener.java
++++ b/src/main/java/net/minecraft/server/LoginListener.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.destroystokyo.paper.PaperConfig;
+ import com.destroystokyo.paper.profile.CraftPlayerProfile;
+ import com.destroystokyo.paper.profile.PlayerProfile;
+ import com.mojang.authlib.GameProfile;
+@@ -10,6 +11,7 @@ import java.net.InetSocketAddress;
+ import java.net.SocketAddress;
+ import java.security.PrivateKey;
+ import java.util.Arrays;
++import java.util.Objects;
+ import java.util.Random;
+ import java.util.UUID;
+ import java.util.concurrent.atomic.AtomicInteger;
+@@ -177,6 +179,9 @@ public class LoginListener implements PacketLoginInListener {
+     }
+ 
+     public String d() {
++        if(PaperConfig.hidePlayersIpsInLogs) {
++            return Objects.toString(this.i);
++        }
+         return this.i != null ? this.i + " (" + this.networkManager.getSocketAddress() + ")" : String.valueOf(this.networkManager.getSocketAddress());
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 70f702680f8221cb262023814a7bae21b0074da6..139b94a87b2d31d03ec833d00e0f88dc7af8ef6a 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import co.aikar.timings.MinecraftTimings;
++import com.destroystokyo.paper.PaperConfig;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+@@ -395,7 +396,13 @@ public abstract class PlayerList {
+         }
+         // Paper end
+         // CraftBukkit - Moved from above, added world
+-        PlayerList.LOGGER.info("{}[{}] logged in with entity id {} at ([{}]{}, {}, {})", entityplayer.getDisplayName().getString(), s1, entityplayer.getId(), worldserver1.worldDataServer.getName(), entityplayer.locX(), entityplayer.locY(), entityplayer.locZ());
++        // Paper start - option to hide ips in logs
++        if(PaperConfig.hidePlayersIpsInLogs) {
++            PlayerList.LOGGER.info("{} logged in with entity id {} at ([{}]{}, {}, {})", entityplayer.getDisplayName().getString(), entityplayer.getId(), worldserver1.worldDataServer.getName(), entityplayer.locX(), entityplayer.locY(), entityplayer.locZ());
++        } else {
++            PlayerList.LOGGER.info("{}[{}] logged in with entity id {} at ([{}]{}, {}, {})", entityplayer.getDisplayName().getString(), s1, entityplayer.getId(), worldserver1.worldDataServer.getName(), entityplayer.locX(), entityplayer.locY(), entityplayer.locZ());
++        }
++        // Paper end
+     }
+ 
+     public void sendScoreboard(ScoreboardServer scoreboardserver, EntityPlayer entityplayer) {
