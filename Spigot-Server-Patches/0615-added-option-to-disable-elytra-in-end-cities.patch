@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Sun, 20 Dec 2020 02:11:27 +0100
+Subject: [PATCH] added option to disable elytra in end cities
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index ae5ed3bd0b663092a4658b24cbd69d37b4e141cb..1b357785ea27f015e976c4e0150db3042f4cdfac 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -709,4 +709,9 @@ public class PaperWorldConfig {
+     private void fixCuringExploit() {
+         fixCuringZombieVillagerDiscountExploit = getBoolean("game-mechanics.fix-curing-zombie-villager-discount-exploit", fixCuringZombieVillagerDiscountExploit);
+     }
++
++    public boolean disableElytraInEndCities = false;
++    private void endCitySettings() {
++        disableElytraInEndCities = getBoolean("settings.elytra-in-end-cities", this.disableElytraInEndCities);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldGenEndCityPieces.java b/src/main/java/net/minecraft/server/WorldGenEndCityPieces.java
+index 45aecd255a1ff28f2b22fd3dfa6ff4bcb34db7af..b6b2a5e78ce47463bedfda1eab78a63ff8221717 100644
+--- a/src/main/java/net/minecraft/server/WorldGenEndCityPieces.java
++++ b/src/main/java/net/minecraft/server/WorldGenEndCityPieces.java
+@@ -279,7 +279,7 @@ public class WorldGenEndCityPieces {
+                 entityshulker.setPosition((double) blockposition.getX() + 0.5D, (double) blockposition.getY() + 0.5D, (double) blockposition.getZ() + 0.5D);
+                 entityshulker.h(blockposition);
+                 worldaccess.addEntity(entityshulker);
+-            } else if (s.startsWith("Elytra")) {
++            } else if (s.startsWith("Elytra") && !worldaccess.getMinecraftWorld().paperConfig.disableElytraInEndCities) { // Paper - added option to elytra
+                 EntityItemFrame entityitemframe = new EntityItemFrame(worldaccess.getMinecraftWorld(), blockposition, this.e.a(EnumDirection.SOUTH));
+ 
+                 entityitemframe.setItem(new ItemStack(Items.ELYTRA), false);
