@@ -5,7 +5,7 @@ Subject: [PATCH] added option to disable elytra in end cities
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index ae5ed3bd0b663092a4658b24cbd69d37b4e141cb..f6c0a29478f56428c7e246e880e1477e12d4c122 100644
+index ae5ed3bd0b663092a4658b24cbd69d37b4e141cb..d1c662928cba249083ba17b13ad01e8a414303b3 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 @@ -709,4 +709,9 @@ public class PaperWorldConfig {
@@ -15,7 +15,7 @@ index ae5ed3bd0b663092a4658b24cbd69d37b4e141cb..f6c0a29478f56428c7e246e880e1477e
 +
 +    public boolean disableElytraInEndCities = false;
 +    private void endCitySettings() {
-+        disableElytraInEndCities = getBoolean("elytra-in-end-cities", this.disableElytraInEndCities);
++        disableElytraInEndCities = getBoolean("disable-elytra-in-end-cities", this.disableElytraInEndCities);
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldGenEndCityPieces.java b/src/main/java/net/minecraft/server/WorldGenEndCityPieces.java
