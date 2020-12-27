@@ -1,18 +1,18 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: lukas81298 <lukas81298@gmail.com>
-Date: Sun, 20 Dec 2020 02:11:27 +0100
-Subject: [PATCH] added option to disable elytra in end cities
+From: lukas <lukasalt98@gmail.com>
+Date: Sun, 27 Dec 2020 01:09:16 +0100
+Subject: [PATCH] added option to disable elytras
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index ae5ed3bd0b663092a4658b24cbd69d37b4e141cb..d1c662928cba249083ba17b13ad01e8a414303b3 100644
+index fc711a596bc424b31739a29a222325438b644882..3351a86c103806b0b7f13d03f0328ac2b4050835 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-@@ -709,4 +709,9 @@ public class PaperWorldConfig {
-     private void fixCuringExploit() {
-         fixCuringZombieVillagerDiscountExploit = getBoolean("game-mechanics.fix-curing-zombie-villager-discount-exploit", fixCuringZombieVillagerDiscountExploit);
+@@ -723,4 +723,9 @@ public class PaperWorldConfig {
+     private void mapInItemFrameSettings() {
+         mapInItemFrameUpdateInterval = Math.max(1, getInt("map-in-item-frame-update-interval", 10));
      }
-+
++    
 +    public boolean disableElytraInEndCities = false;
 +    private void endCitySettings() {
 +        disableElytraInEndCities = getBoolean("disable-elytra-in-end-cities", this.disableElytraInEndCities);
