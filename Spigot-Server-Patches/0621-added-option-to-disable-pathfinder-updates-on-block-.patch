@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas <lukasalt98@gmail.com>
+Date: Sun, 27 Dec 2020 16:22:42 +0100
+Subject: [PATCH] added option to disable pathfinder updates on block updates
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index 3351a86c103806b0b7f13d03f0328ac2b4050835..e973657c9b9fdf5787518bf29458ee89fbdc585c 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -728,4 +728,9 @@ public class PaperWorldConfig {
+     private void endCitySettings() {
+         disableElytraInEndCities = getBoolean("disable-elytra-in-end-cities", this.disableElytraInEndCities);
+     }
++    
++    public boolean updatePathfindingOnBlockUpdates = true;
++    private void pathFindingOnBlockUpdates() {
++        updatePathfindingOnBlockUpdates = getBoolean("update-pathfinding-on-block-updates", updatePathfindingOnBlockUpdates);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 5b0b6edfa790918e56399ff6c83f3feb6e5aca49..a6520f80b873c348af23fb50435f6a16736abb6e 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -1570,6 +1570,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+     @Override
+     public void notify(BlockPosition blockposition, IBlockData iblockdata, IBlockData iblockdata1, int i) {
+         this.getChunkProvider().flagDirty(blockposition);
++        if (!paperConfig.updatePathfindingOnBlockUpdates) return; // Paper
+         VoxelShape voxelshape = iblockdata.getCollisionShape(this, blockposition);
+         VoxelShape voxelshape1 = iblockdata1.getCollisionShape(this, blockposition);
+ 
