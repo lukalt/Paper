@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Tue, 29 Dec 2020 17:07:47 +0100
+Subject: [PATCH] added option to disable item damage event
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index e973657c9b9fdf5787518bf29458ee89fbdc585c..c38cf6b47d7c18d4b69bd6f1f5b0d8ac67630b75 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -733,4 +733,9 @@ public class PaperWorldConfig {
+     private void pathFindingOnBlockUpdates() {
+         updatePathfindingOnBlockUpdates = getBoolean("update-pathfinding-on-block-updates", updatePathfindingOnBlockUpdates);
+     }
++
++    public boolean callItemDamageEvent = true;
++    private void itemDamageConfiguration() {
++        callItemDamageEvent = getBoolean("call-item-damage-event", this.callItemDamageEvent);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
+index ba73d14437cfdf07ef0f1f6266131c113c2741fd..6a7102b8728c248d420645d318eafa209addf42e 100644
+--- a/src/main/java/net/minecraft/server/EntityItem.java
++++ b/src/main/java/net/minecraft/server/EntityItem.java
+@@ -276,7 +276,7 @@ public class EntityItem extends Entity {
+             return false;
+         } else {
+             // CraftBukkit start
+-            if (org.bukkit.craftbukkit.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, f)) {
++            if (world.paperConfig.callItemDamageEvent && org.bukkit.craftbukkit.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, damagesource, f)) { // Paper - added option disable item damage event for items
+                 return false;
+             }
+             // CraftBukkit end
