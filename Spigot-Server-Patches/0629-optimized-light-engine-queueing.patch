@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Sun, 3 Jan 2021 21:04:29 +0100
+Subject: [PATCH] optimized light engine queueing
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 370c577077ef697bd8c9946d1188090886ca72f7..1995d1baf9fd336a4593a49469b73e7e10efd5d9 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -855,6 +855,7 @@ public class ChunkProviderServer extends IChunkProvider {
+                     }
+                 }
+             });
++            getLightEngine().queueUpdate(); // Paper - moved from WorldServer.a(Chunk,int)
+             this.world.getMethodProfiler().enter("customSpawners");
+             if (flag1) {
+                 try (co.aikar.timings.Timing ignored = this.world.timings.miscMobSpawning.startTiming()) { // Paper - timings
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 14a427ac33d46de6a8ce6c6cfb14634b2c8cb323..1428cb49faa7ed19ea3a6aa77f1c22d956172bdc 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -714,7 +714,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+             }
+             gameprofilerfiller.exit();
+             timings.chunkTicksBlocks.stopTiming(); // Paper
+-            getChunkProvider().getLightEngine().queueUpdate(); // Paper
++            // getChunkProvider().getLightEngine().queueUpdate(); // Paper - moved to ChunkProviderServer
+             // Paper end
+         }
+     }
