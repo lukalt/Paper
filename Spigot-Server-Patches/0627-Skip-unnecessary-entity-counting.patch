@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Sun, 3 Jan 2021 20:45:14 +0100
+Subject: [PATCH] Skip unnecessary entity counting
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 6acb5f05a05c542f8257e205ef70987be2d29194..370c577077ef697bd8c9946d1188090886ca72f7 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -801,6 +801,10 @@ public class ChunkProviderServer extends IChunkProvider {
+             int l = this.chunkMapDistance.b();
+             // Paper start - per player mob spawning
+             SpawnerCreature.d spawnercreature_d; // moved down
++            // Paper start - only count entities when mob spawning is enabled
++            if(!flag1 || (!allowAnimals && !allowMonsters)) {
++                spawnercreature_d = null;
++            } else // Paper end
+             if (this.playerChunkMap.playerMobDistanceMap != null) {
+                 // update distance map
+                 this.world.timings.playerMobDistanceMapUpdate.startTiming();
