@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Tue, 5 Jan 2021 18:18:13 +0100
+Subject: [PATCH] updated pom for gommehd fork
+
+
+diff --git a/pom.xml b/pom.xml
+index 1c33b1f4d2366116dd45478b8ad9cdb51fd6bb57..f15b8dd43c85d99ed899c216c62b030132a4bfa8 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -3,14 +3,13 @@
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     <modelVersion>4.0.0</modelVersion>
+     <parent>
+-        <groupId>com.destroystokyo.paper</groupId>
++        <groupId>net.gommehd.paper</groupId>
+         <artifactId>paper-parent</artifactId>
+         <version>dev-SNAPSHOT</version>
+     </parent>
+ 
+-    <groupId>com.destroystokyo.paper</groupId>
+     <artifactId>paper-api</artifactId>
+-    <version>1.16.4-R0.1-SNAPSHOT</version>
++    <version>1.16.4-R1.0.0-SNAPSHOT</version>
+     <packaging>jar</packaging>
+ 
+     <name>Paper-API</name>
