@@ -43,10 +43,10 @@ index e69093b411f76ea4090789576f8fb6635bd02ca5..6941eec3bf50b60b545480806a2c30ef
              return new DataWatcher.Item<>(this.a, this.a.b().a(this.b));
          }
 diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
-index 39f5e73895cf70f1ff1231bdeba986816e579d68..f1e163f44700ff94bd828b1152b0dfe1d978aabb 100644
+index 39f5e73895cf70f1ff1231bdeba986816e579d68..5179525a2d49b15e6aa4c2209efe66b7aa3428f9 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
-@@ -5,8 +5,8 @@ import java.util.List;
+@@ -5,8 +5,15 @@ import java.util.List;
  
  public class PacketPlayOutEntityMetadata implements Packet<PacketListenerPlayOut> {
  
@@ -54,6 +54,13 @@ index 39f5e73895cf70f1ff1231bdeba986816e579d68..f1e163f44700ff94bd828b1152b0dfe1
 -    private List<DataWatcher.Item<?>> b;
 +    private int a; public final int getEntityId() { return this.a; } // Paper - add getter
 +    private List<DataWatcher.Item<?>> b; public final List<DataWatcher.Item<?>> getMetaDataItems() { return this.b; } public final void setMetaDataItems(List<DataWatcher.Item<?>> items) { this.b = items; }// Paper - add getter and setter
++
++    // Paper start - added constructor
++    public PacketPlayOutEntityMetadata(int entityId, List<DataWatcher.Item<?>> items) {
++        this.a = entityId;
++        this.b = items;
++    }
++    // Paper end
  
      public PacketPlayOutEntityMetadata() {}
  
