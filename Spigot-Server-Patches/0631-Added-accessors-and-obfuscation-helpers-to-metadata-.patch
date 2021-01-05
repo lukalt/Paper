@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Tue, 5 Jan 2021 18:17:34 +0100
+Subject: [PATCH] Added accessors and obfuscation helpers to metadata and
+ datawatchers
+
+
+diff --git a/src/main/java/net/minecraft/server/DataWatcher.java b/src/main/java/net/minecraft/server/DataWatcher.java
+index e69093b411f76ea4090789576f8fb6635bd02ca5..6941eec3bf50b60b545480806a2c30ef462e5357 100644
+--- a/src/main/java/net/minecraft/server/DataWatcher.java
++++ b/src/main/java/net/minecraft/server/DataWatcher.java
+@@ -278,26 +278,32 @@ public class DataWatcher {
+             this.c = true;
+         }
+ 
++        public final DataWatcherObject<T> getAccessor() { return this.a; } // Paper - OBFHELPER
+         public DataWatcherObject<T> a() {
+             return this.a;
+         }
+ 
++        public final void setValue(T value) { this.b = value; } // Paper - OBFHELPER
+         public void a(T t0) {
+             this.b = t0;
+         }
+ 
++        public final T getValue() { return this.b; } // Paper - OBFHELPER
+         public T b() {
+             return this.b;
+         }
+ 
++        public final boolean isDirty() { return this.c; } // Paper - OBFHELPER
+         public boolean c() {
+             return this.c;
+         }
+ 
++        public final void setDirty(boolean dirty) { this.c = dirty; } // Paper - OBFHELPER
+         public void a(boolean flag) {
+             this.c = flag;
+         }
+ 
++        public DataWatcher.Item<T> copy() { return new DataWatcher.Item<>(this.a, this.a.b().a(this.b)); } // Paper - OBFHELPER
+         public DataWatcher.Item<T> d() {
+             return new DataWatcher.Item<>(this.a, this.a.b().a(this.b));
+         }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
+index 39f5e73895cf70f1ff1231bdeba986816e579d68..f1e163f44700ff94bd828b1152b0dfe1d978aabb 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
+@@ -5,8 +5,8 @@ import java.util.List;
+ 
+ public class PacketPlayOutEntityMetadata implements Packet<PacketListenerPlayOut> {
+ 
+-    private int a;
+-    private List<DataWatcher.Item<?>> b;
++    private int a; public final int getEntityId() { return this.a; } // Paper - add getter
++    private List<DataWatcher.Item<?>> b; public final List<DataWatcher.Item<?>> getMetaDataItems() { return this.b; } public final void setMetaDataItems(List<DataWatcher.Item<?>> items) { this.b = items; }// Paper - add getter and setter
+ 
+     public PacketPlayOutEntityMetadata() {}
+ 
