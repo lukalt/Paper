@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Tue, 5 Jan 2021 22:16:59 +0100
+Subject: [PATCH] made projectilehitevent cancellable
+
+
+diff --git a/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java b/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java
+index 809c1098c16fe52eda47ae2335afab30e36746b2..5afb2995f762912ef7033624145e70aef68eb317 100644
+--- a/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java
++++ b/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java
+@@ -4,6 +4,7 @@ import org.bukkit.block.Block;
+ import org.bukkit.block.BlockFace;
+ import org.bukkit.entity.Entity;
+ import org.bukkit.entity.Projectile;
++import org.bukkit.event.Cancellable;
+ import org.bukkit.event.HandlerList;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -11,11 +12,12 @@ import org.jetbrains.annotations.Nullable;
+ /**
+  * Called when a projectile hits an object
+  */
+-public class ProjectileHitEvent extends EntityEvent {
++public class ProjectileHitEvent extends EntityEvent implements Cancellable { // Paper implement cancellable
+     private static final HandlerList handlers = new HandlerList();
+     private final Entity hitEntity;
+     private final Block hitBlock;
+     private final BlockFace hitFace;
++    private boolean cancelled; // Paper
+ 
+     public ProjectileHitEvent(@NotNull final Projectile projectile) {
+         this(projectile, null, null);
+@@ -40,6 +42,16 @@ public class ProjectileHitEvent extends EntityEvent {
+         this.hitFace = hitFace;
+     }
+ 
++    // Paper start
++    public void setCancelled(boolean cancelled) {
++        this.cancelled = cancelled;
++    }
++
++    public boolean isCancelled() {
++        return this.cancelled;
++    }
++    // Paper end
++
+     @NotNull
+     @Override
+     public Projectile getEntity() {
