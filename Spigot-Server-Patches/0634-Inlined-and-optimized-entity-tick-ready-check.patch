@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Wed, 6 Jan 2021 15:03:36 +0100
+Subject: [PATCH] Inlined and optimized entity tick ready check
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 1c60634cf92c26a913d38189c27a28edad7b6b54..8f6ad04348988022f53cc0d1d69eedb5703ea296 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -810,7 +810,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+     }
+ 
+     public void entityJoinedWorld(Entity entity) {
+-        if (!(entity instanceof EntityHuman) && !this.getChunkProvider().a(entity)) {
++        Chunk chunk; PlayerChunk playerChunk; if (!(entity instanceof EntityHuman) && ((chunk = entity.getCurrentChunk()) == null || (playerChunk = chunk.playerChunk) == null || !playerChunk.isEntityTickingReady())) { // Paper - inlined tick ready chunk from ChunkProviderServer.a(Entity)
+             this.chunkCheck(entity);
+         } else {
+             ++TimingHistory.entityTicks; // Paper - timings
