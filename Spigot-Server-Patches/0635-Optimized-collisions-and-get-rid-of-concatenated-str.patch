@@ -112,8 +112,20 @@ index 0000000000000000000000000000000000000000..f5798f8dde7c3b28c448afbe1d02b139
 +        };
 +    }
 +}
+diff --git a/src/main/java/net/minecraft/server/BlockBase.java b/src/main/java/net/minecraft/server/BlockBase.java
+index 1f334d63282bd5c23dc3b275a220f09e60c34537..97d56cf92f04f16b10b701c3d1c0ffa99743df36 100644
+--- a/src/main/java/net/minecraft/server/BlockBase.java
++++ b/src/main/java/net/minecraft/server/BlockBase.java
+@@ -589,6 +589,7 @@ public abstract class BlockBase {
+             this.getBlock().attack(this.p(), world, blockposition, entityhuman);
+         }
+ 
++        public final boolean isSuffocating(IBlockAccess iblockaccess, BlockPosition blockposition) { return o(iblockaccess, blockposition); } // Paper - OBFHELPER
+         public boolean o(IBlockAccess iblockaccess, BlockPosition blockposition) {
+             return this.m.test(this.p(), iblockaccess, blockposition);
+         }
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 67487996903f374f306a02788eda5ac014a46fd4..2b8cdb4a433958868a824e601a9f847985710213 100644
+index 67487996903f374f306a02788eda5ac014a46fd4..7e3bab3ddc22df6d3b7a84b5d095ef70637de678 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -1,5 +1,7 @@
@@ -133,13 +145,22 @@ index 67487996903f374f306a02788eda5ac014a46fd4..2b8cdb4a433958868a824e601a9f8479
  
              if (vec3d1.g() > 1.0E-7D) {
                  this.a(this.getBoundingBox().c(vec3d1));
+@@ -728,7 +730,7 @@ public abstract class Entity implements INamableTileEntity, ICommandListener, Ke
+                 this.setFireTicks(-this.getMaxFireTicks());
+             }
+ 
+-            if (this.aG() && this.isBurning()) {
++            if (this.isBurning() && this.isInWaterOrRainOrBubble()) { // Paper - swap and
+                 this.playSound(SoundEffects.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+                 this.setFireTicks(-this.getMaxFireTicks());
+             }
 @@ -815,66 +817,85 @@ public abstract class Entity implements INamableTileEntity, ICommandListener, Ke
          return d0;
      }
  
 -    private Vec3D g(Vec3D vec3d) {
 +    private Vec3D g(Vec3D vec3d) { return collide(vec3d); } // Paper - OBFHELPER
-+    private Vec3D collide(Vec3D vec3d) {
++    private Vec3D collide(Vec3D vec3d) { // Paper - renamed private method
          AxisAlignedBB axisalignedbb = this.getBoundingBox();
          VoxelShapeCollision voxelshapecollision = VoxelShapeCollision.a(this);
 -        VoxelShape voxelshape = this.world.getWorldBorder().c();
@@ -151,7 +172,7 @@ index 67487996903f374f306a02788eda5ac014a46fd4..2b8cdb4a433958868a824e601a9f8479
 -        Vec3D vec3d1 = vec3d.g() == 0.0D ? vec3d : a(this, vec3d, axisalignedbb, this.world, voxelshapecollision, streamaccumulator);
 +        // Paper start - get rid of concatenated streams
 +        // VoxelShape voxelshape = this.world.getWorldBorder().c();
-+        VoxelShape borderShape = !this.world.getWorldBorder().isInBounds(axisalignedbb) ? null : this.world.getWorldBorder().c(); // Paper
++        VoxelShape borderShape = !this.world.getWorldBorder().isInBounds(axisalignedbb) ? null : this.world.getWorldBorder().asVoxelShape(); // Paper
 +        CachingCallable<StreamAccumulator<VoxelShape>> entityCollisionCallable = new CachingCallable<StreamAccumulator<VoxelShape>>() {
 +            @Override
 +            public StreamAccumulator<VoxelShape> call0() {
@@ -314,11 +335,27 @@ index 67487996903f374f306a02788eda5ac014a46fd4..2b8cdb4a433958868a824e601a9f8479
          }
  
          return new Vec3D(d0, d1, d2);
+@@ -1944,9 +1966,12 @@ public abstract class Entity implements INamableTileEntity, ICommandListener, Ke
+             float f1 = this.size.width * 0.8F;
+             AxisAlignedBB axisalignedbb = AxisAlignedBB.g((double) f1, 0.10000000149011612D, (double) f1).d(this.locX(), this.getHeadY(), this.locZ());
+ 
+-            return this.world.b(this, axisalignedbb, (iblockdata, blockposition) -> {
+-                return iblockdata.o(this.world, blockposition);
+-            }).findAny().isPresent();
++            // Paper start
++            VoxelShapeSpliterator spliterator = new VoxelShapeSpliterator(this.world, this, axisalignedbb, (iblockdata, blockposition) -> {
++                return iblockdata.isSuffocating(this.world, blockposition);
++            });
++            return spliterator.getNext() != null;
++            // Paper end
+         }
+     }
+ 
 diff --git a/src/main/java/net/minecraft/server/ICollisionAccess.java b/src/main/java/net/minecraft/server/ICollisionAccess.java
-index 496ebb7453ae4736ac43d319530e2d00b3840fb9..8d8737b5190620714031c4f15c98b2ff9c0522ed 100644
+index 496ebb7453ae4736ac43d319530e2d00b3840fb9..054ef551c3ef7e8dfded1a7713342e3e3296feb6 100644
 --- a/src/main/java/net/minecraft/server/ICollisionAccess.java
 +++ b/src/main/java/net/minecraft/server/ICollisionAccess.java
-@@ -48,7 +48,16 @@ public interface ICollisionAccess extends IBlockAccess {
+@@ -48,12 +48,21 @@ public interface ICollisionAccess extends IBlockAccess {
  
      default boolean b(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) {
          try { if (entity != null) entity.collisionLoadChunks = true; // Paper
@@ -336,6 +373,12 @@ index 496ebb7453ae4736ac43d319530e2d00b3840fb9..8d8737b5190620714031c4f15c98b2ff
          } finally { if (entity != null) entity.collisionLoadChunks = false; } // Paper
      }
  
+ 
+-    default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) { return d(entity, axisalignedbb, predicate); };
++    default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) { return c(entity, axisalignedbb, predicate); };
+     Stream<VoxelShape> c(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate);
+ 
+     default Stream<VoxelShape> getCollisions(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) { return d(entity, axisalignedbb, predicate); } // Paper - OBFHELPER
 diff --git a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 index e841611bb7c36dffec44bb9e74a0a9657a113263..b54396070307a5e9e99557b613707699052bb709 100644
 --- a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
