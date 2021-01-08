@@ -380,7 +380,7 @@ index 496ebb7453ae4736ac43d319530e2d00b3840fb9..054ef551c3ef7e8dfded1a7713342e3e
  
      default Stream<VoxelShape> getCollisions(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) { return d(entity, axisalignedbb, predicate); } // Paper - OBFHELPER
 diff --git a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
-index e841611bb7c36dffec44bb9e74a0a9657a113263..b54396070307a5e9e99557b613707699052bb709 100644
+index e841611bb7c36dffec44bb9e74a0a9657a113263..4136a547b171c4eaf778d91892ebce54bb3fb890 100644
 --- a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 +++ b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 @@ -6,7 +6,7 @@ import java.util.function.BiPredicate;
@@ -392,7 +392,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..b54396070307a5e9e99557b613707699
  
      @Nullable
      private final Entity a; final Entity getEntity() { return this.a; } // Paper - OBFHELPER
-@@ -49,6 +49,93 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -49,6 +49,96 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
          return this.h && this.b(consumer) || this.a(consumer);
      }
  
@@ -402,7 +402,10 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..b54396070307a5e9e99557b613707699
 +    public final VoxelShape getNext() {
 +        if(this.h) {
 +            this.h = false;
-+            return getWorldBorderShape();
++            VoxelShape worldBorderCollision = getWorldBorderShape();
++            if(worldBorderCollision != null) {
++                return worldBorderCollision;
++            }
 +        }
 +        while (true) {
 +            if (this.d.a()) {
@@ -486,7 +489,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..b54396070307a5e9e99557b613707699
      boolean a(Consumer<? super VoxelShape> consumer) {
          while (true) {
              if (this.d.a()) {
-@@ -147,6 +234,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -147,6 +237,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
          return VoxelShapes.c(voxelshape, VoxelShapes.a(axisalignedbb.shrink(1.0E-7D)), OperatorBoolean.AND);
      }
  
