@@ -1,6 +1,7 @@
 Paper ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/PaperMC/Paper/Build%20Paper/master)
 ===========
 
+This is a fork of Paperspigot dedicated to GommeHD.net. Patches that everyone could profit from are submitted as a pull request to the upstream on a regular basis. Patches exclusively for GommeHD.net start with GHD.
 High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.
 
 

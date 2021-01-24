@@ -1,0 +1,138 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gommehd.net>
+Date: Sat, 23 Jan 2021 02:37:38 +0100
+Subject: [PATCH] GHD - further optimized collisions
+
+
+diff --git a/src/main/java/net/minecraft/server/AxisAlignedBB.java b/src/main/java/net/minecraft/server/AxisAlignedBB.java
+index ed9b2f9adfecdc6d1b9925579ec510657adde11f..94c854b98bc6052fa555bdebd34c69238ebc2db4 100644
+--- a/src/main/java/net/minecraft/server/AxisAlignedBB.java
++++ b/src/main/java/net/minecraft/server/AxisAlignedBB.java
+@@ -1,8 +1,8 @@
+ package net.minecraft.server;
+ 
++import javax.annotation.Nullable;
+ import java.util.Iterator;
+ import java.util.Optional;
+-import javax.annotation.Nullable;
+ 
+ public class AxisAlignedBB {
+ 
+@@ -26,6 +26,12 @@ public class AxisAlignedBB {
+         this((double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), (double) (blockposition.getX() + 1), (double) (blockposition.getY() + 1), (double) (blockposition.getZ() + 1));
+     }
+ 
++    // Paper start
++    public AxisAlignedBB(double x, double y, double z) {
++        this(x, y, z, x + 1, y + 1, z + 1);
++    }
++    // Paper end
++
+     public AxisAlignedBB(BlockPosition blockposition, BlockPosition blockposition1) {
+         this((double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), (double) blockposition1.getX(), (double) blockposition1.getY(), (double) blockposition1.getZ());
+     }
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index b463d6954a6524c6f79450afa2d603b05b8a6f03..bb4d2a2e5379be909c190a9e7d14282fb74d959b 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -933,6 +933,7 @@ public class Chunk implements IChunkAccess {
+                     } else if(entity != null && !entity.canCollideWithEntity(entity1))  {
+                         continue;
+                     }
++
+                     if (predicate == null || predicate.test(entity1)) {
+                         if(!VoxelShapes.a(entity1.getBoundingBox()).isEmpty()) {
+                             return false;
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index b34bcedae2f3a71a9f8a987b69908ac39311597c..d98a82c457c14862e9aa4fb2c53838ed7e1f6b92 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -271,12 +271,14 @@ public class ChunkProviderServer extends IChunkProvider {
+ 
+     @Nullable
+     public Chunk getChunkAtIfLoadedImmediately(int x, int z) {
+-        long k = ChunkCoordIntPair.pair(x, z);
++        // long k = ChunkCoordIntPair.pair(x, z); // Paper - moved down
+ 
+         if (Thread.currentThread() == this.serverThread) {
+             return this.getChunkAtIfLoadedMainThread(x, z);
+         }
+ 
++        long k = ChunkCoordIntPair.pair(x, z); // Paper - moved from top
++
+         Chunk ret = null;
+         long readlock;
+         do {
+diff --git a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
+index 225810c8d3ea7c7aa77ee8143fbad95250fd20ab..0d1ab5bf010a73786c0b228ab1e84baad9a8efa9 100644
+--- a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
++++ b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
+@@ -18,9 +18,11 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> imple
+     private final BlockPosition.MutableBlockPosition e; final BlockPosition.MutableBlockPosition getMutablePos() { return this.e; } // Paper - OBFHELPER
+     private final VoxelShape f;
+     private final ICollisionAccess g; final ICollisionAccess getCollisionAccess() { return this.g; } // Paper - OBFHELPER
+-    private boolean h; public boolean shouldCheckWorldBorder() { return this.h; } // Paper - OBFHELPER
++    private boolean h; public final boolean shouldCheckWorldBorder() { return this.h; } // Paper - OBFHELPER
+     private final BiPredicate<IBlockData, BlockPosition> i;
+ 
++    private IChunkAccess lastChunk = null; // Paper
++
+     public VoxelShapeSpliterator(ICollisionAccess icollisionaccess, @Nullable Entity entity, AxisAlignedBB axisalignedbb) {
+         this(icollisionaccess, entity, axisalignedbb, (iblockdata, blockposition) -> {
+             return true;
+@@ -75,21 +77,38 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> imple
+                     continue;
+                 }
+ 
+-                // Paper start - ensure we don't load chunks
+                 Entity entity = this.getEntity();
+-                BlockPosition.MutableBlockPosition blockposition_mutableblockposition = this.getMutablePos();
+                 boolean far = entity != null && MCUtil.distanceSq(entity.locX(), y, entity.locZ(), x, y, z) > 14;
+-                blockposition_mutableblockposition.setValues(x, y, z);
+ 
+                 boolean isRegionLimited = this.getCollisionAccess() instanceof RegionLimitedWorldAccess;
+-                IBlockData iblockdata = isRegionLimited ? Blocks.VOID_AIR.getBlockData() : ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)
+-                    ? this.getCollisionAccess().getType(blockposition_mutableblockposition)
+-                    : this.getCollisionAccess().getTypeIfLoaded(blockposition_mutableblockposition)
+-                );
++                IBlockData iblockdata;
++                if(isRegionLimited) {
++                    iblockdata = Blocks.VOID_AIR.getBlockData();
++                } else if(getCollisionAccess() instanceof World){
++                    final int mx = x >> 4;
++                    final int mz = z >> 4;
++                    if(lastChunk != null && lastChunk.getPos().x == mx  && lastChunk.getPos().z == mz) {
++                        iblockdata = lastChunk.getType(x, y, z);
++                    } else {
++                        final World world = (World) getCollisionAccess();
++                        lastChunk = ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)) ? world.getChunkProvider().getChunkAt(mx, mz, ChunkStatus.FULL, true) : world.getChunkIfLoadedImmediately(mx, mz);
++                        if(lastChunk != null) {
++                            iblockdata = lastChunk.getType(x, y, z);
++                        } else {
++                            iblockdata = null;
++                        }
++                    }
++                } else {
++                    BlockPosition.MutableBlockPosition blockposition_mutableblockposition = this.getMutablePos();
++                    blockposition_mutableblockposition.setValues(x, y, z);
++                    iblockdata = ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)
++                        ? this.getCollisionAccess().getType(blockposition_mutableblockposition)
++                        : this.getCollisionAccess().getTypeIfLoaded(blockposition_mutableblockposition));
++                }
+ 
+                 if (iblockdata == null) {
+                     if (!(entity instanceof EntityPlayer) || entity.world.paperConfig.preventMovingIntoUnloadedChunks) {
+-                        VoxelShape voxelshape3 = VoxelShapes.of(far ? entity.getBoundingBox() : new AxisAlignedBB(new BlockPosition(x, y, z)));
++                        VoxelShape voxelshape3 = VoxelShapes.of(far ? entity.getBoundingBox() : new AxisAlignedBB(x, y, z)); // Paper - skip unnecessary BlockPosition allocation
+                         return voxelshape3;
+                     }
+                     continue;
+@@ -144,7 +163,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> imple
+     }
+ 
+     // Paper start
+-    public VoxelShape getWorldBorderShape() {
++    public final VoxelShape getWorldBorderShape() {
+         this.h = false;
+         WorldBorder worldborder = this.g.getWorldBorder();
+         AxisAlignedBB axisalignedbb = this.a.getBoundingBox();

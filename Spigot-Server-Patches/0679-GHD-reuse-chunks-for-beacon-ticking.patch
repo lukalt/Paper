@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gommehd.net>
+Date: Fri, 22 Jan 2021 21:47:43 +0100
+Subject: [PATCH] GHD - reuse chunks for beacon ticking
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityBeacon.java b/src/main/java/net/minecraft/server/TileEntityBeacon.java
+index f97b27a4751d1fc3287de8dba384ab5639b832b8..d85048767d834be2e65372395d544ace274d82ed 100644
+--- a/src/main/java/net/minecraft/server/TileEntityBeacon.java
++++ b/src/main/java/net/minecraft/server/TileEntityBeacon.java
+@@ -130,8 +130,9 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory, ITic
+ 
+         int i1;
+ 
++        IChunkAccess chunk = this.world.getChunkProvider().getChunkAt(blockposition.getX() >> 4, blockposition.getZ() >> 4, ChunkStatus.FULL, true); // Paper - reuse chunks
+         for (i1 = 0; i1 < 10 && blockposition.getY() <= l; ++i1) {
+-            IBlockData iblockdata = this.world.getType(blockposition);
++            IBlockData iblockdata = chunk.getType(blockposition); // Paper - directly access chunk
+             Block block = iblockdata.getBlock();
+ 
+             if (block instanceof IBeaconBeam) {

@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gommehd.net>
+Date: Fri, 22 Jan 2021 21:45:32 +0100
+Subject: [PATCH] GHD - configurable despawn check interval
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index abd2fd112fec4eb7a0feb2be34b6f866e654aba4..0b9dac134d5f7cbfb152ebb3ea2dcb55a0ad7499 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -814,4 +814,8 @@ public class PaperWorldConfig {
+         mapInItemFrameUpdateInterval = Math.max(1, getInt("map-in-item-frame-update-interval", 10));
+     }
+ 
++    public int checkDespawnTickInterval = 1;
++    private void setCheckDespawnTickInterval() {
++        checkDespawnTickInterval = getInt("check-despawn-tick-interval", this.checkDespawnTickInterval);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 38b8a98bccf06027204cc8216456939a6c403ed2..67fb7889bb50774f98cfa9c044402c9f98442b5e 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -512,7 +512,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+                 // CraftBukkit end */
+ 
+                 gameprofilerfiller.enter("checkDespawn");
+-                if (!entity.dead) {
++                if (!entity.dead && entity.ticksLived % paperConfig.checkDespawnTickInterval == 0) { // Paper - configurable despawn check interval
+                     entity.checkDespawn();
+                 }
+ 
+@@ -2232,7 +2232,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+     public String F() {
+         return String.format("players: %s, entities: %d [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entitiesById.size(), a(this.entitiesById.values(), (entity) -> { // CraftBukkit - decompile error
+             return IRegistry.ENTITY_TYPE.getKey(entity.getEntityType());
+-        }), this.tileEntityListTick.size(), a(this.tileEntityListTick, (tileentity) -> { // CraftBukkit - decompile error
++        }), this.tileEntityListTick.size(), a(this.tileEntityListTick.asList(), (tileentity) -> { // CraftBukkit - decompile error // Paper
+             return IRegistry.BLOCK_ENTITY_TYPE.getKey(tileentity.getTileType());
+         }), this.getBlockTickList().a(), this.getFluidTickList().a(), this.P());
+     }

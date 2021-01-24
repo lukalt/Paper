@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gmail.com>
+Date: Sun, 13 Dec 2020 13:01:55 +0100
+Subject: [PATCH] GHD - made map update interval configurable
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index fb6282e7de296be2787aecdef299b1ec7f9d8953..abd2fd112fec4eb7a0feb2be34b6f866e654aba4 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -808,5 +808,10 @@ public class PaperWorldConfig {
+         villagerBehaviorMinCooldown = getInt("villager-behavior.cooldown-min", 0);
+         villagerBehaviorMaxCooldown = getInt("villager-behavior.cooldown-max", 20);
+     }
++	
++	public int mapInItemFrameUpdateInterval = 10;
++    private void mapInItemFrameSettings() {
++        mapInItemFrameUpdateInterval = Math.max(1, getInt("map-in-item-frame-update-interval", 10));
++    }
+ 
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index 4efc40c01ec12b80bd7cf9d35cf0ea0df973baf7..f8095407383e6fc8d7d66b9b8b67515dc593c4ba 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -86,7 +86,7 @@ public class EntityTrackerEntry {
+             EntityItemFrame entityitemframe = (EntityItemFrame) this.tracker;
+             ItemStack itemstack = entityitemframe.getItem();
+ 
+-            if (this.tickCounter % 10 == 0 && itemstack.getItem() instanceof ItemWorldMap) { // CraftBukkit - Moved this.tickCounter % 10 logic here so item frames do not enter the other blocks
++            if (this.tickCounter % this.tracker.world.paperConfig.mapInItemFrameUpdateInterval == 0 && itemstack.getItem() instanceof ItemWorldMap) { // CraftBukkit - Moved this.tickCounter % 10 logic here so item frames do not enter the other blocks, Paper - made update interval configurable
+                 WorldMap worldmap = ItemWorldMap.getSavedMap(itemstack, this.b);
+                 Iterator iterator = this.trackedPlayers.iterator(); // CraftBukkit
+ 
