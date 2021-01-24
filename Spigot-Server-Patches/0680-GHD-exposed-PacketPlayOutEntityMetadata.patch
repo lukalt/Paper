@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: lukas81298 <lukas81298@gommehd.net>
 Date: Sun, 24 Jan 2021 18:47:50 +0100
-Subject: [PATCH] exposed PacketPlayOutEntityMetadata
+Subject: [PATCH] GHD - exposed PacketPlayOutEntityMetadata
 
 
 diff --git a/src/main/java/net/minecraft/server/DataWatcher.java b/src/main/java/net/minecraft/server/DataWatcher.java
