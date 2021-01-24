@@ -114,6 +114,23 @@ index 0000000000000000000000000000000000000000..a2f183a5dedd321d2793fc52791bae1f
 +        };
 +    }
 +}
+diff --git a/src/main/java/net/minecraft/server/AxisAlignedBB.java b/src/main/java/net/minecraft/server/AxisAlignedBB.java
+index ed9b2f9adfecdc6d1b9925579ec510657adde11f..a7fad84ac3313bb0198e5125856fec1386e7ee51 100644
+--- a/src/main/java/net/minecraft/server/AxisAlignedBB.java
++++ b/src/main/java/net/minecraft/server/AxisAlignedBB.java
+@@ -30,6 +30,12 @@ public class AxisAlignedBB {
+         this((double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), (double) blockposition1.getX(), (double) blockposition1.getY(), (double) blockposition1.getZ());
+     }
+ 
++    // Paper start
++    public AxisAlignedBB(double x, double y, double z) {
++        this(x, y, z, x + 1, y + 1, z + 1);
++    }
++    // Paper end
++
+     public AxisAlignedBB(Vec3D vec3d, Vec3D vec3d1) {
+         this(vec3d.x, vec3d.y, vec3d.z, vec3d1.x, vec3d1.y, vec3d1.z);
+     }
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
 index f49ceaf3084ea00f63c607bc98e2eaf3aa25ff73..b463d6954a6524c6f79450afa2d603b05b8a6f03 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
@@ -176,6 +193,24 @@ index f49ceaf3084ea00f63c607bc98e2eaf3aa25ff73..b463d6954a6524c6f79450afa2d603b0
      public <T extends Entity> void a(@Nullable EntityTypes<?> entitytypes, AxisAlignedBB axisalignedbb, List<? super T> list, Predicate<? super T> predicate) {
          org.spigotmc.AsyncCatcher.catchOp("Chunk getEntities call"); // Spigot
          int i = MathHelper.floor((axisalignedbb.minY - 2.0D) / 16.0D);
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index b34bcedae2f3a71a9f8a987b69908ac39311597c..cdf1285b940752de7ce074ec13b815a76740408e 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -271,11 +271,12 @@ public class ChunkProviderServer extends IChunkProvider {
+ 
+     @Nullable
+     public Chunk getChunkAtIfLoadedImmediately(int x, int z) {
+-        long k = ChunkCoordIntPair.pair(x, z);
++        // long k = ChunkCoordIntPair.pair(x, z); // Paper - moved down
+ 
+         if (Thread.currentThread() == this.serverThread) {
+             return this.getChunkAtIfLoadedMainThread(x, z);
+         }
++        long k = ChunkCoordIntPair.pair(x, z); // Paper - moved down from above
+ 
+         Chunk ret = null;
+         long readlock;
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
 index 0b1d3aac7c3f83a595a87b1cd36bd6e31890c579..05613eeba201907c3dbc8080f07c92b300bb0393 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
@@ -357,7 +392,7 @@ index 718a846a22a958851e5f984b0e68ceb59fb6dc2a..962371443c85919cc696336d15b6e38e
      default Stream<VoxelShape> d(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) {
          return Stream.concat(this.b(entity, axisalignedbb), this.c(entity, axisalignedbb, predicate));
 diff --git a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
-index e841611bb7c36dffec44bb9e74a0a9657a113263..225810c8d3ea7c7aa77ee8143fbad95250fd20ab 100644
+index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b28045217 100644
 --- a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 +++ b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 @@ -1,12 +1,14 @@
@@ -376,21 +411,25 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..225810c8d3ea7c7aa77ee8143fbad952
  
      @Nullable
      private final Entity a; final Entity getEntity() { return this.a; } // Paper - OBFHELPER
-@@ -16,7 +18,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -16,9 +18,11 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
      private final BlockPosition.MutableBlockPosition e; final BlockPosition.MutableBlockPosition getMutablePos() { return this.e; } // Paper - OBFHELPER
      private final VoxelShape f;
      private final ICollisionAccess g; final ICollisionAccess getCollisionAccess() { return this.g; } // Paper - OBFHELPER
 -    private boolean h;
-+    private boolean h; public boolean shouldCheckWorldBorder() { return this.h; } // Paper - OBFHELPER
++    private boolean h; public final boolean shouldCheckWorldBorder() { return this.h; } // Paper - OBFHELPER
      private final BiPredicate<IBlockData, BlockPosition> i;
  
++    private IChunkAccess lastChunk = null; // Paper
++
      public VoxelShapeSpliterator(ICollisionAccess icollisionaccess, @Nullable Entity entity, AxisAlignedBB axisalignedbb) {
-@@ -49,7 +51,19 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+         this(icollisionaccess, entity, axisalignedbb, (iblockdata, blockposition) -> {
+             return true;
+@@ -49,7 +53,19 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
          return this.h && this.b(consumer) || this.a(consumer);
      }
  
 -    boolean a(Consumer<? super VoxelShape> consumer) {
-+    // Paper start
++    // Paper start - reimplement tryAdvance(Consumer).
 +    @Override
 +    public VoxelShape tryAdvance() {
 +        if(this.shouldCheckWorldBorder()) {
@@ -406,17 +445,65 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..225810c8d3ea7c7aa77ee8143fbad952
          while (true) {
              if (this.d.a()) {
                  int i = this.d.b(); final int x = i;
-@@ -76,8 +90,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -61,28 +77,45 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+                     continue;
+                 }
+ 
+-                // Paper start - ensure we don't load chunks
+                 Entity entity = this.getEntity();
+-                BlockPosition.MutableBlockPosition blockposition_mutableblockposition = this.getMutablePos();
+                 boolean far = entity != null && MCUtil.distanceSq(entity.locX(), y, entity.locZ(), x, y, z) > 14;
+-                blockposition_mutableblockposition.setValues(x, y, z);
+ 
+                 boolean isRegionLimited = this.getCollisionAccess() instanceof RegionLimitedWorldAccess;
+-                IBlockData iblockdata = isRegionLimited ? Blocks.VOID_AIR.getBlockData() : ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)
+-                    ? this.getCollisionAccess().getType(blockposition_mutableblockposition)
+-                    : this.getCollisionAccess().getTypeIfLoaded(blockposition_mutableblockposition)
+-                );
++                IBlockData iblockdata;
++                if (isRegionLimited) {
++                    iblockdata = Blocks.VOID_AIR.getBlockData();
++                } else if (getCollisionAccess() instanceof World) { // In case the collision access is a world, we can reuse the last chunk and do not need to lookup it multiple times
++                    final int mx = x >> 4;
++                    final int mz = z >> 4;
++                    if (lastChunk != null && lastChunk.getPos().x == mx && lastChunk.getPos().z == mz) { // check if the chunk has not changed
++                        iblockdata = lastChunk.getType(x, y, z);
++                    } else {
++                        final World world = (World) getCollisionAccess();
++                        // lookup the new chunk, inlined contents of the old code
++                        lastChunk = ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)) ? world.getChunkProvider().getChunkAt(mx, mz, ChunkStatus.FULL, true) : world.getChunkIfLoadedImmediately(mx, mz);
++                        if (lastChunk != null) {
++                            iblockdata = lastChunk.getType(x, y, z);
++                        } else {
++                            iblockdata = null;
++                        }
++                    }
++                } else {
++                    // fallback for other cases (e.g. chunk caches)
++                    BlockPosition.MutableBlockPosition blockposition_mutableblockposition = this.getMutablePos();
++                    blockposition_mutableblockposition.setValues(x, y, z);
++                    iblockdata = ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)
++                        ? this.getCollisionAccess().getType(blockposition_mutableblockposition)
++                        : this.getCollisionAccess().getTypeIfLoaded(blockposition_mutableblockposition));
++                }
++
+ 
                  if (iblockdata == null) {
                      if (!(entity instanceof EntityPlayer) || entity.world.paperConfig.preventMovingIntoUnloadedChunks) {
-                         VoxelShape voxelshape3 = VoxelShapes.of(far ? entity.getBoundingBox() : new AxisAlignedBB(new BlockPosition(x, y, z)));
+-                        VoxelShape voxelshape3 = VoxelShapes.of(far ? entity.getBoundingBox() : new AxisAlignedBB(new BlockPosition(x, y, z)));
 -                        consumer.accept(voxelshape3);
 -                        return true;
++                        VoxelShape voxelshape3 = VoxelShapes.of(far ? entity.getBoundingBox() : new AxisAlignedBB(x, y, z)); // Paper - skip unnecessary BlockPosition allocation
 +                        return voxelshape3;
                      }
                      continue;
                  }
-@@ -95,8 +108,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+-                // Paper - moved up
+-                // Paper end
+ 
+                 if (!this.i.test(iblockdata, this.e) || l == 1 && !iblockdata.d() || l == 2 && !iblockdata.a(Blocks.MOVING_PISTON)) {
+                     continue;
+@@ -95,8 +128,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
                          continue;
                      }
  
@@ -426,7 +513,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..225810c8d3ea7c7aa77ee8143fbad952
                  }
  
                  VoxelShape voxelshape1 = voxelshape.a((double) i, (double) j, (double) k);
-@@ -105,13 +117,23 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -105,13 +137,23 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
                      continue;
                  }
  
@@ -453,14 +540,14 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..225810c8d3ea7c7aa77ee8143fbad952
  
      @Nullable
      private IBlockAccess a(int i, int j) {
-@@ -121,21 +143,30 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -121,21 +163,30 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
          return this.g.c(k, l);
      }
  
 -    boolean b(Consumer<? super VoxelShape> consumer) {
 -        Objects.requireNonNull(this.a);
 +    // Paper start
-+    public VoxelShape getWorldBorderShape() {
++    public final VoxelShape getWorldBorderShape() {
          this.h = false;
          WorldBorder worldborder = this.g.getWorldBorder();
          AxisAlignedBB axisalignedbb = this.a.getBoundingBox();
