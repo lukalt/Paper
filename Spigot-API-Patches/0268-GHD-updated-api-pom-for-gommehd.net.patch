@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: lukas81298 <lukas81298@gommehd.net>
+Date: Sun, 24 Jan 2021 17:16:26 +0100
+Subject: [PATCH] GHD - updated api pom for gommehd.net
+
+
+diff --git a/pom.xml b/pom.xml
+index 6c6ae6b48094c86c74cd4e9f4214056f63e6ac68..3616e3b765ee30b29f82ac0d696caf88fd4a024c 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -3,12 +3,11 @@
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     <modelVersion>4.0.0</modelVersion>
+     <parent>
+-        <groupId>com.destroystokyo.paper</groupId>
++        <groupId>net.gommehd.paper</groupId>
+         <artifactId>paper-parent</artifactId>
+         <version>dev-SNAPSHOT</version>
+     </parent>
+ 
+-    <groupId>com.destroystokyo.paper</groupId>
+     <artifactId>paper-api</artifactId>
+     <version>1.16.5-R0.1-SNAPSHOT</version>
+     <packaging>jar</packaging>
