@@ -103,3 +103,16 @@ index 61b2595b7b4fcde706cdb846fc6babd1d20881b7..ffea9dca95e530b0533b220e9bf37c51
      protected final List<TileEntity> tileEntityListPending = Lists.newArrayList();
      protected final java.util.Set<TileEntity> tileEntityListUnload = com.google.common.collect.Sets.newHashSet();
      public final Thread serverThread;
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 38b8a98bccf06027204cc8216456939a6c403ed2..c19fdb2123025c4a198ad13088466404ae0fc894 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -2237,7 +2237,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+         }), this.getBlockTickList().a(), this.getFluidTickList().a(), this.P());
+     }
+ 
+-    private static <T> String a(Collection<T> collection, Function<T, MinecraftKey> function) {
++    private static <T> String a(Iterable<T> collection, Function<T, MinecraftKey> function) { // Paper - Collection -> Iterable
+         try {
+             Object2IntOpenHashMap<MinecraftKey> object2intopenhashmap = new Object2IntOpenHashMap();
+             Iterator<T> iterator = collection.iterator(); // CraftBukkit - decompile error
