@@ -5,7 +5,7 @@ Subject: [PATCH] GHD - optimized dirt and snow spreading
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockDirtSnowSpreadable.java b/src/main/java/net/minecraft/server/BlockDirtSnowSpreadable.java
-index 7b29d47dfdef7611db58068af285f76d92a9f12a..1682117bf9ccd2dfbe137ceace57af970a0cce1a 100644
+index 7b29d47dfdef7611db58068af285f76d92a9f12a..169d6fee60a1260973c88e8eedd82de6d2bad0bb 100644
 --- a/src/main/java/net/minecraft/server/BlockDirtSnowSpreadable.java
 +++ b/src/main/java/net/minecraft/server/BlockDirtSnowSpreadable.java
 @@ -8,9 +8,10 @@ public abstract class BlockDirtSnowSpreadable extends BlockDirtSnow {
@@ -57,7 +57,7 @@ index 7b29d47dfdef7611db58068af285f76d92a9f12a..1682117bf9ccd2dfbe137ceace57af97
 -                    if (worldserver.getType(blockposition1).a(Blocks.DIRT) && c(iblockdata1, (IWorldReader) worldserver, blockposition1)) {
 -                        org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockSpreadEvent(worldserver, blockposition, blockposition1, (IBlockData) iblockdata1.set(BlockDirtSnowSpreadable.a, worldserver.getType(blockposition1.up()).a(Blocks.SNOW))); // CraftBukkit
 +                    // Paper - cache chunk
-+                    Chunk chunk1 = worldserver.getChunkAt(blockposition1.getX(), blockposition1.getZ());
++                    Chunk chunk1 = worldserver.getChunkAt(blockposition1.getX() >> 4, blockposition1.getZ() >> 4);
 +                    if(chunk1 == null) {
 +                        return;
 +                    }
