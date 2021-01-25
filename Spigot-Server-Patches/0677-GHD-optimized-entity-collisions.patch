@@ -194,10 +194,10 @@ index f49ceaf3084ea00f63c607bc98e2eaf3aa25ff73..b463d6954a6524c6f79450afa2d603b0
          org.spigotmc.AsyncCatcher.catchOp("Chunk getEntities call"); // Spigot
          int i = MathHelper.floor((axisalignedbb.minY - 2.0D) / 16.0D);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index b34bcedae2f3a71a9f8a987b69908ac39311597c..cdf1285b940752de7ce074ec13b815a76740408e 100644
+index 7cab4c5f7e5ae0dbc360f2ba856621b3ed0ead09..9f2f8d22c40b3962fca76145446e1f223a45a7a8 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -271,11 +271,12 @@ public class ChunkProviderServer extends IChunkProvider {
+@@ -272,11 +272,12 @@ public class ChunkProviderServer extends IChunkProvider {
  
      @Nullable
      public Chunk getChunkAtIfLoadedImmediately(int x, int z) {

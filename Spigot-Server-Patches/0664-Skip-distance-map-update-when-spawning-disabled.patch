@@ -5,10 +5,18 @@ Subject: [PATCH] Skip distance map update when spawning disabled.
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 75d25576d68ec95a14372f8530f4916f2bd7c3c5..96a6f4675dc10a0047b7d2ee4164d0376de36c27 100644
+index 75d25576d68ec95a14372f8530f4916f2bd7c3c5..4b8ebc47fa358b3e2ae879358f6b0cc3a8de5dbc 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -792,7 +792,7 @@ public class ChunkProviderServer extends IChunkProvider {
+@@ -19,6 +19,7 @@ import java.util.function.Supplier;
+ import javax.annotation.Nullable;
+ import com.destroystokyo.paper.exception.ServerInternalException;
+ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap; // Paper
++import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -792,7 +793,7 @@ public class ChunkProviderServer extends IChunkProvider {
              int l = this.chunkMapDistance.b();
              // Paper start - per player mob spawning
              SpawnerCreature.d spawnercreature_d; // moved down
@@ -17,3 +25,12 @@ index 75d25576d68ec95a14372f8530f4916f2bd7c3c5..96a6f4675dc10a0047b7d2ee4164d037
                  // update distance map
                  this.world.timings.playerMobDistanceMapUpdate.startTiming();
                  this.playerChunkMap.playerMobDistanceMap.update(this.world.players, this.playerChunkMap.viewDistance);
+@@ -803,7 +804,7 @@ public class ChunkProviderServer extends IChunkProvider {
+                 }
+                 spawnercreature_d = SpawnerCreature.countMobs(l, this.world.A(), this::a, true);
+             } else {
+-                spawnercreature_d = SpawnerCreature.countMobs(l, this.world.A(), this::a, false);
++                spawnercreature_d = (this.allowAnimals || this.allowMonsters) ? SpawnerCreature.countMobs(l, this.world.A(), this::a, false) : null;
+             }
+             // Paper end
+             this.world.timings.countNaturalMobs.stopTiming(); // Paper - timings

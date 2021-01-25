@@ -5,10 +5,10 @@ Subject: [PATCH] GHD - optimized light engine queueing
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 96a6f4675dc10a0047b7d2ee4164d0376de36c27..b34bcedae2f3a71a9f8a987b69908ac39311597c 100644
+index 4b8ebc47fa358b3e2ae879358f6b0cc3a8de5dbc..7cab4c5f7e5ae0dbc360f2ba856621b3ed0ead09 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -842,6 +842,7 @@ public class ChunkProviderServer extends IChunkProvider {
+@@ -843,6 +843,7 @@ public class ChunkProviderServer extends IChunkProvider {
                      }
                  }
              });
