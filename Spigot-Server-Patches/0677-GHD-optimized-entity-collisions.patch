@@ -392,7 +392,7 @@ index 718a846a22a958851e5f984b0e68ceb59fb6dc2a..962371443c85919cc696336d15b6e38e
      default Stream<VoxelShape> d(@Nullable Entity entity, AxisAlignedBB axisalignedbb, Predicate<Entity> predicate) {
          return Stream.concat(this.b(entity, axisalignedbb), this.c(entity, axisalignedbb, predicate));
 diff --git a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
-index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b28045217 100644
+index e841611bb7c36dffec44bb9e74a0a9657a113263..74c4f2e3648f1cd6769c5edfa879f91bf262c84e 100644
 --- a/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 +++ b/src/main/java/net/minecraft/server/VoxelShapeSpliterator.java
 @@ -1,12 +1,14 @@
@@ -445,7 +445,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b
          while (true) {
              if (this.d.a()) {
                  int i = this.d.b(); final int x = i;
-@@ -61,28 +77,45 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -61,28 +77,49 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
                      continue;
                  }
  
@@ -466,14 +466,18 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b
 +                } else if (getCollisionAccess() instanceof World) { // In case the collision access is a world, we can reuse the last chunk and do not need to lookup it multiple times
 +                    final int mx = x >> 4;
 +                    final int mz = z >> 4;
++                    final World world = (World) getCollisionAccess();
 +                    if (lastChunk != null && lastChunk.getPos().x == mx && lastChunk.getPos().z == mz) { // check if the chunk has not changed
-+                        iblockdata = lastChunk.getType(x, y, z);
++                        BlockPosition.MutableBlockPosition blockposition_mutableblockposition = this.getMutablePos();
++                        blockposition_mutableblockposition.setValues(x, y, z);
++                        iblockdata = world.getTypeFromChunk(blockposition_mutableblockposition, lastChunk);
 +                    } else {
-+                        final World world = (World) getCollisionAccess();
 +                        // lookup the new chunk, inlined contents of the old code
 +                        lastChunk = ((!far && entity instanceof EntityPlayer) || (entity != null && entity.collisionLoadChunks)) ? world.getChunkProvider().getChunkAt(mx, mz, ChunkStatus.FULL, true) : world.getChunkIfLoadedImmediately(mx, mz);
 +                        if (lastChunk != null) {
-+                            iblockdata = lastChunk.getType(x, y, z);
++                            BlockPosition.MutableBlockPosition blockposition_mutableblockposition = this.getMutablePos();
++                            blockposition_mutableblockposition.setValues(x, y, z);
++                            iblockdata = world.getTypeFromChunk(blockposition_mutableblockposition, lastChunk);
 +                        } else {
 +                            iblockdata = null;
 +                        }
@@ -503,7 +507,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b
  
                  if (!this.i.test(iblockdata, this.e) || l == 1 && !iblockdata.d() || l == 2 && !iblockdata.a(Blocks.MOVING_PISTON)) {
                      continue;
-@@ -95,8 +128,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -95,8 +132,7 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
                          continue;
                      }
  
@@ -513,7 +517,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b
                  }
  
                  VoxelShape voxelshape1 = voxelshape.a((double) i, (double) j, (double) k);
-@@ -105,13 +137,23 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -105,13 +141,23 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
                      continue;
                  }
  
@@ -540,7 +544,7 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b
  
      @Nullable
      private IBlockAccess a(int i, int j) {
-@@ -121,21 +163,30 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
+@@ -121,21 +167,30 @@ public class VoxelShapeSpliterator extends AbstractSpliterator<VoxelShape> {
          return this.g.c(k, l);
      }
  
@@ -578,10 +582,32 @@ index e841611bb7c36dffec44bb9e74a0a9657a113263..68e25526fef4cd1ec269ae0ed603eb6b
      }
  
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index ffea9dca95e530b0533b220e9bf37c51b86de948..9ae6f8499d4a67d2e016f4a9bdfb784b345834ef 100644
+index ffea9dca95e530b0533b220e9bf37c51b86de948..62fdf0190f0eec7f16a0e1fdf59ea626a8056f49 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1105,6 +1105,35 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
+@@ -314,6 +314,21 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
+         return chunk == null ? null : chunk.getType(blockposition);
+     }
+ 
++    // Paper start
++    public final IBlockData getTypeFromChunk(BlockPosition blockposition, IChunkAccess chunk) {
++        if (captureTreeGeneration) {
++            CraftBlockState previous = capturedBlockStates.get(blockposition);
++            if (previous != null) {
++                return previous.getHandle();
++            }
++        }
++        if (!isValidLocation(blockposition)) {
++            return Blocks.AIR.getBlockData();
++        }
++        return chunk == null ? null : chunk.getType(blockposition);
++    }
++    // Paper end
++
+     @Override
+     public final Fluid getFluidIfLoaded(BlockPosition blockposition) {
+         IChunkAccess chunk = this.getChunkIfLoadedImmediately(blockposition.getX() >> 4, blockposition.getZ() >> 4);
+@@ -1105,6 +1120,35 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
          return list;
      }
  
