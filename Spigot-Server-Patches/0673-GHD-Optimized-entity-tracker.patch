@@ -18,7 +18,7 @@ index a6f904ba54610d3f47d65282c0a972a8c74894ad..0b1d3aac7c3f83a595a87b1cd36bd6e3
              }
          }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index f8095407383e6fc8d7d66b9b8b67515dc593c4ba..045b36fa3da632ed21a4daf44adeda09af111ed3 100644
+index 345a35ce0f6f1c7cf6a5404deb2f03c56a33354c..d28a918c9db9552a29c130ae2918bf9760c92008 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -84,9 +84,9 @@ public class EntityTrackerEntry {
@@ -42,7 +42,7 @@ index f8095407383e6fc8d7d66b9b8b67515dc593c4ba..045b36fa3da632ed21a4daf44adeda09
          }
  
          if (this.tickCounter % this.d == 0 || this.tracker.impulse || this.tracker.getDataWatcher().a()) {
-@@ -365,12 +365,27 @@ public class EntityTrackerEntry {
+@@ -366,12 +366,27 @@ public class EntityTrackerEntry {
  
      }
  
@@ -70,7 +70,7 @@ index f8095407383e6fc8d7d66b9b8b67515dc593c4ba..045b36fa3da632ed21a4daf44adeda09
  
          if (this.tracker instanceof EntityLiving) {
              Set<AttributeModifiable> set = ((EntityLiving) this.tracker).getAttributeMap().getAttributes();
-@@ -382,9 +397,10 @@ public class EntityTrackerEntry {
+@@ -383,9 +398,10 @@ public class EntityTrackerEntry {
                  }
                  // CraftBukkit end
                  this.broadcastIncludingSelf(new PacketPlayOutUpdateAttributes(this.tracker.getId(), set));
