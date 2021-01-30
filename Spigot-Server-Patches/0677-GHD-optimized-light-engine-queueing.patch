@@ -17,7 +17,7 @@ index 4b8ebc47fa358b3e2ae879358f6b0cc3a8de5dbc..7cab4c5f7e5ae0dbc360f2ba856621b3
              if (flag1) {
                  try (co.aikar.timings.Timing ignored = this.world.timings.miscMobSpawning.startTiming()) { // Paper - timings
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index fdf6380bb95fd5d82842f69411ba440b520f82ca..fe0e4dd4967d3371deb4bc1be2fc46868e4e8c65 100644
+index 2b94c195db43d8e7fd58301a33377e87daa16e98..5ea69cb8abe7da954b84db08ec0fcf1cec41b150 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -715,7 +715,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {

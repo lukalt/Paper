@@ -104,10 +104,10 @@ index 61b2595b7b4fcde706cdb846fc6babd1d20881b7..ffea9dca95e530b0533b220e9bf37c51
      protected final java.util.Set<TileEntity> tileEntityListUnload = com.google.common.collect.Sets.newHashSet();
      public final Thread serverThread;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index fe0e4dd4967d3371deb4bc1be2fc46868e4e8c65..9a9b65a2ff9a5c8b10cb4582a7edaaaa77c6d5dc 100644
+index 5ea69cb8abe7da954b84db08ec0fcf1cec41b150..67ba4acfafed1b691d45fbdd062d0ea1b441e4a8 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -2238,7 +2238,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+@@ -2240,7 +2240,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
          }), this.getBlockTickList().a(), this.getFluidTickList().a(), this.P());
      }
  

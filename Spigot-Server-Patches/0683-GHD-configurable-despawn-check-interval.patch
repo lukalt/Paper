@@ -5,20 +5,22 @@ Subject: [PATCH] GHD - configurable despawn check interval
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index abd2fd112fec4eb7a0feb2be34b6f866e654aba4..0b9dac134d5f7cbfb152ebb3ea2dcb55a0ad7499 100644
+index 2335f3bb1541b78cf25969ccf35866e7f752ae55..ab6cb5070624f68b958f109e7b91c57ccc521410 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-@@ -814,4 +814,8 @@ public class PaperWorldConfig {
-         mapInItemFrameUpdateInterval = Math.max(1, getInt("map-in-item-frame-update-interval", 10));
-     }
- 
+@@ -817,5 +817,10 @@ public class PaperWorldConfig {
+     public boolean updatePathfindingOnBlockUpdate = true;
+     private void setUpdatePathfindingOnBlockUpdate() {
+         updatePathfindingOnBlockUpdate = getBoolean("update-pathfinding-on-block-update", this.updatePathfindingOnBlockUpdate);
++	}
++	
 +    public int checkDespawnTickInterval = 1;
 +    private void setCheckDespawnTickInterval() {
 +        checkDespawnTickInterval = getInt("check-despawn-tick-interval", this.checkDespawnTickInterval);
-+    }
+     }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 9a9b65a2ff9a5c8b10cb4582a7edaaaa77c6d5dc..ee1b3a1e12875adfc45277afcfcaef441845e865 100644
+index 67ba4acfafed1b691d45fbdd062d0ea1b441e4a8..52b18db28c37f7d841d79afff69837ca9dda6db0 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -513,7 +513,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
@@ -30,7 +32,7 @@ index 9a9b65a2ff9a5c8b10cb4582a7edaaaa77c6d5dc..ee1b3a1e12875adfc45277afcfcaef44
                      entity.checkDespawn();
                  }
  
-@@ -2233,7 +2233,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+@@ -2235,7 +2235,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
      public String F() {
          return String.format("players: %s, entities: %d [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entitiesById.size(), a(this.entitiesById.values(), (entity) -> { // CraftBukkit - decompile error
              return IRegistry.ENTITY_TYPE.getKey(entity.getEntityType());
