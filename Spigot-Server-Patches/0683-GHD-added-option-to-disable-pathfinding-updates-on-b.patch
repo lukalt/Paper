@@ -20,10 +20,10 @@ index 0b9dac134d5f7cbfb152ebb3ea2dcb55a0ad7499..1d93e863d8247b2cf9050aa107da2f34
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index c3adaf6c82308b414bc03a73739344288e6a68d3..de94c96aa68c341422e36b7edaea71098b3649cd 100644
+index ee1b3a1e12875adfc45277afcfcaef441845e865..85182c36f42ddf9b633f6deeec4823e37b4ad836 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -1570,6 +1570,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+@@ -1571,6 +1571,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
      @Override
      public void notify(BlockPosition blockposition, IBlockData iblockdata, IBlockData iblockdata1, int i) {
          this.getChunkProvider().flagDirty(blockposition);

@@ -18,10 +18,10 @@ index abd2fd112fec4eb7a0feb2be34b6f866e654aba4..0b9dac134d5f7cbfb152ebb3ea2dcb55
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index c19fdb2123025c4a198ad13088466404ae0fc894..c3adaf6c82308b414bc03a73739344288e6a68d3 100644
+index 9a9b65a2ff9a5c8b10cb4582a7edaaaa77c6d5dc..ee1b3a1e12875adfc45277afcfcaef441845e865 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -512,7 +512,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+@@ -513,7 +513,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
                  // CraftBukkit end */
  
                  gameprofilerfiller.enter("checkDespawn");
@@ -30,7 +30,7 @@ index c19fdb2123025c4a198ad13088466404ae0fc894..c3adaf6c82308b414bc03a7373934428
                      entity.checkDespawn();
                  }
  
-@@ -2232,7 +2232,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
+@@ -2233,7 +2233,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
      public String F() {
          return String.format("players: %s, entities: %d [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entitiesById.size(), a(this.entitiesById.values(), (entity) -> { // CraftBukkit - decompile error
              return IRegistry.ENTITY_TYPE.getKey(entity.getEntityType());

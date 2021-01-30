@@ -20,7 +20,7 @@ index fb6282e7de296be2787aecdef299b1ec7f9d8953..abd2fd112fec4eb7a0feb2be34b6f866
  
  }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 4efc40c01ec12b80bd7cf9d35cf0ea0df973baf7..f8095407383e6fc8d7d66b9b8b67515dc593c4ba 100644
+index 3960a975e74ed81c45819fe5e0f01c6c18252982..345a35ce0f6f1c7cf6a5404deb2f03c56a33354c 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -86,7 +86,7 @@ public class EntityTrackerEntry {
