@@ -5,17 +5,21 @@ Subject: [PATCH] Disable spigot tick limiters
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index d8ff91fea7d00f035bac0fa7378dcf675a719857..1a6e39e34186534d4784d4fddffa45dfd2496840 100644
+index ca874ef00a925095c01767f5b41737302645f149..a669e26ab28a7b165bdbd5c547b30b5d92b2c598 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -655,9 +655,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
+@@ -654,11 +654,9 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
+         this.tickingTileEntities = true;
          // Spigot start
          // Iterator iterator = this.tileEntityListTick.iterator();
-         int tilesThisCycle = 0;
+-        int tilesThisCycle = 0;
 -        for (tileLimiter.initTick();
 -                tilesThisCycle < tileEntityListTick.size() && (tilesThisCycle % 10 != 0 || tileLimiter.shouldContinue());
 -                tileTickPosition++, tilesThisCycle++) {
-+        for (tileTickPosition = 0; tileTickPosition < tileEntityListTick.size(); tileTickPosition++) { // Paper - Disable tick limiters
-             tileTickPosition = (tileTickPosition < tileEntityListTick.size()) ? tileTickPosition : 0;
+-            tileTickPosition = (tileTickPosition < tileEntityListTick.size()) ? tileTickPosition : 0;
++        int tilesThisCycle = tileEntityListTick.size(); // Paper
++        for (tileTickPosition = 0; tileTickPosition < tilesThisCycle; tileTickPosition++) { // Paper - Disable tick limiters
++            //tileTickPosition = (tileTickPosition < tileEntityListTick.size()) ? tileTickPosition : 0; // Paper
              TileEntity tileentity = (TileEntity) this.tileEntityListTick.get(tileTickPosition);
              // Spigot start
+             if (tileentity == null) {
